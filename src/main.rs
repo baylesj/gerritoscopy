@@ -1,11 +1,15 @@
 mod gerrit;
+mod render;
 mod stats;
 
+use std::path::PathBuf;
+
 use anyhow::{Context, Result};
-use chrono::{Datelike, NaiveDate};
+use chrono::NaiveDate;
 use clap::Parser;
 
 use gerrit::{ChangeQuery, ChangeStatus, GerritClient};
+use render::{fmt_count, heatmap_body, heatmap_header};
 use stats::{Heatmap, Stats};
 
 // ---------------------------------------------------------------------------
@@ -27,7 +31,6 @@ struct Args {
     owner: String,
 
     /// Only include changes submitted on or after this date (YYYY-MM-DD).
-    /// Useful for limiting fetch time on accounts with long histories.
     #[arg(long)]
     after: Option<String>,
 
@@ -38,6 +41,10 @@ struct Args {
     /// Gerrit HTTP password (paired with --username).
     #[arg(long)]
     password: Option<String>,
+
+    /// Write a markdown report to this file.
+    #[arg(long)]
+    output_md: Option<PathBuf>,
 }
 
 // ---------------------------------------------------------------------------
@@ -57,6 +64,13 @@ async fn main() -> Result<()> {
 
     let stats = stats::compute(&changes, chrono::Utc::now());
     print_report(&args.owner, &stats);
+
+    if let Some(ref path) = args.output_md {
+        let md = render::markdown::render(&args.owner, &args.host, &stats)?;
+        std::fs::write(path, &md)
+            .with_context(|| format!("writing {}", path.display()))?;
+        eprintln!("wrote {}", path.display());
+    }
 
     Ok(())
 }
@@ -80,7 +94,7 @@ fn build_query(args: &Args) -> Result<ChangeQuery> {
 }
 
 // ---------------------------------------------------------------------------
-// Text report
+// Terminal report
 // ---------------------------------------------------------------------------
 
 fn print_report(owner: &str, s: &Stats) {
@@ -95,15 +109,15 @@ fn print_report(owner: &str, s: &Stats) {
     print_heatmap(&s.heatmap);
 
     println!();
-    println!("  Merged CLs     {:>7}  (all time)", fmt_i(s.total_merged as i64));
-    println!("  Last 90 days   {:>7}", fmt_i(s.recent_merged_90d as i64));
+    println!("  Merged CLs     {:>7}  (all time)", fmt_count(s.total_merged as i64));
+    println!("  Last 90 days   {:>7}", fmt_count(s.recent_merged_90d as i64));
     println!(
         "  Lines changed  +{} / -{}",
-        fmt_i(s.total_insertions),
-        fmt_i(s.total_deletions),
+        fmt_count(s.total_insertions),
+        fmt_count(s.total_deletions),
     );
     println!(
-        "  Streak         current {:} wk  ·  longest {:} wk",
+        "  Streak         current {} wk  ·  longest {} wk",
         s.heatmap.current_streak(),
         s.heatmap.longest_streak(),
     );
@@ -115,9 +129,9 @@ fn print_report(owner: &str, s: &Stats) {
             println!(
                 "    {:<36} {:>5} CLs  +{} / -{}",
                 truncate(&p.name, 36),
-                fmt_i(p.merged as i64),
-                fmt_i(p.insertions),
-                fmt_i(p.deletions),
+                fmt_count(p.merged as i64),
+                fmt_count(p.insertions),
+                fmt_count(p.deletions),
             );
         }
     }
@@ -126,98 +140,20 @@ fn print_report(owner: &str, s: &Stats) {
 }
 
 fn print_heatmap(h: &Heatmap) {
-    // Block characters for intensity levels 0-4.
-    const BLOCKS: [char; 5] = [' ', '░', '▒', '▓', '█'];
-
-    // Month-label row: print abbreviated month name at the first bucket of
-    // each new calendar month.  Each bucket is 1 char wide.
-    let mut label_row = vec![' '; h.weeks.len()];
-    let mut last_month = 0u32;
-    let mut last_month_pos = 0usize;
-    for (i, b) in h.weeks.iter().enumerate() {
-        let m = b.week_start.month();
-        if m != last_month {
-            // Write a 3-char month abbreviation if there's room before the
-            // next label position.
-            let abbr = month_abbr(m);
-            if i == 0 || i >= last_month_pos + 4 {
-                for (j, ch) in abbr.chars().enumerate() {
-                    if i + j < label_row.len() {
-                        label_row[i + j] = ch;
-                    }
-                }
-                last_month_pos = i;
-            }
-            last_month = m;
-        }
-    }
-
-    let label_str: String = label_row.into_iter().collect();
-    let heat_str: String = h
-        .weeks
-        .iter()
-        .map(|b| BLOCKS[b.level(h.max_count) as usize])
-        .collect();
-
     println!();
-    println!("  {label_str}");
-    println!("  [{heat_str}]");
+    println!("  {}", heatmap_header(h));
+    println!("  [{}]", heatmap_body(h));
     println!("  peak: {} CLs/week", h.max_count);
 }
 
 // ---------------------------------------------------------------------------
-// Formatting helpers
+// Helpers
 // ---------------------------------------------------------------------------
-
-fn fmt_i(n: i64) -> String {
-    // Insert thousands separators.
-    let digits = n.unsigned_abs().to_string();
-    let grouped: String = digits
-        .chars()
-        .rev()
-        .enumerate()
-        .flat_map(|(i, c)| {
-            if i > 0 && i % 3 == 0 {
-                Some(',')
-            } else {
-                None
-            }
-            .into_iter()
-            .chain(std::iter::once(c))
-        })
-        .collect::<String>()
-        .chars()
-        .rev()
-        .collect();
-    if n < 0 {
-        format!("-{grouped}")
-    } else {
-        grouped
-    }
-}
 
 fn truncate(s: &str, max: usize) -> String {
     if s.len() <= max {
         s.to_owned()
     } else {
         format!("{}…", &s[..max - 1])
-    }
-}
-
-fn month_abbr(m: u32) -> &'static str {
-    match m {
-        1 => "Jan",
-        2 => "Feb",
-        3 => "Mar",
-        4 => "Apr",
-        5 => "May",
-        6 => "Jun",
-        7 => "Jul",
-        8 => "Aug",
-        9 => "Sep",
-        10 => "Oct",
-        11 => "Nov",
-        12 => "Dec",
-        _ => "???",
     }
 }
