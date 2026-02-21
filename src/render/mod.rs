@@ -143,7 +143,6 @@ mod tests {
                         + chrono::Duration::weeks(i as i64),
                     count: 0,
                     review_count: 0,
-                    lines_changed: 0,
                     family_counts: HashMap::new(),
                 })
                 .collect(),

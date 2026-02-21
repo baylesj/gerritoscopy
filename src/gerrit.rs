@@ -388,19 +388,10 @@ pub struct ReviewEvent {
 /// being absent — Gerrit's schema is additive and forward-compatible.
 #[derive(Debug, Deserialize)]
 pub struct ChangeInfo {
-    /// Globally unique change ID (`project~branch~Change-Id`).
-    pub id: String,
     /// Repository / project name within the Gerrit host.
     pub project: String,
-    /// Target branch (e.g. `main`, `refs/heads/main`).
-    pub branch: String,
-    /// First line of the commit message.
-    pub subject: String,
     /// Current lifecycle status.
     pub status: ChangeStatus,
-    /// Timestamp when the change was first uploaded.
-    #[serde(deserialize_with = "de_gerrit_ts")]
-    pub created: DateTime<Utc>,
     /// Timestamp of the most recent update.
     #[serde(deserialize_with = "de_gerrit_ts")]
     pub updated: DateTime<Utc>,
@@ -413,9 +404,6 @@ pub struct ChangeInfo {
     pub insertions: i32,
     /// Net lines removed across all patch sets.
     pub deletions: i32,
-    /// Monotonically increasing numeric change number for this Gerrit host.
-    #[serde(rename = "_number")]
-    pub number: u64,
     /// Present and `true` on the last item of a page when additional results
     /// exist.  Consumed by the pagination loop; not meaningful to callers.
     #[serde(rename = "_more_changes", default)]
@@ -554,7 +542,6 @@ mod tests {
         assert_eq!(c.status, ChangeStatus::Merged);
         assert_eq!(c.insertions, 42);
         assert_eq!(c.deletions, 7);
-        assert_eq!(c.number, 12345);
         assert!(c.submitted.is_some());
         assert!(c.more_changes.unwrap());
     }

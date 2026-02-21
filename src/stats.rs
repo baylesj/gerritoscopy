@@ -82,10 +82,8 @@ pub struct WeekBucket {
     pub count: u32,
     /// Number of those contributions that were reviews (not merges).
     ///
-    /// Tracked separately so that `level()` can weight reviews more heavily.
+    /// Tracked separately so that the SVG tooltip can break down CLs vs reviews.
     pub review_count: u32,
-    /// Total lines touched (`insertions + deletions`) during this week.
-    pub lines_changed: u64,
     /// CL count broken down by project family (see [`project_family`]).
     ///
     /// Used by the renderer to assign per-project colours within a cell.
@@ -166,7 +164,6 @@ pub fn compute(changes: &[ChangeInfo], reviews: &[ReviewEvent], now: DateTime<Ut
             week_start: heatmap_start + Duration::weeks(i as i64),
             count: 0,
             review_count: 0,
-            lines_changed: 0,
             family_counts: HashMap::new(),
         })
         .collect();
@@ -218,10 +215,6 @@ pub fn compute(changes: &[ChangeInfo], reviews: &[ReviewEvent], now: DateTime<Ut
             let idx = (ws - heatmap_start).num_weeks() as usize;
             if idx < HEATMAP_WEEKS {
                 buckets[idx].count += 1;
-                // Both fields are non-negative in Gerrit; unsigned_abs is a
-                // no-op here but avoids any sign-extension surprises.
-                buckets[idx].lines_changed += change.insertions.unsigned_abs() as u64
-                    + change.deletions.unsigned_abs() as u64;
                 // Roll up into the project family for per-project colouring.
                 *buckets[idx]
                     .family_counts
@@ -344,17 +337,12 @@ mod tests {
 
     fn merged_cl(project: &str, submitted: &str, ins: i32, del: i32) -> ChangeInfo {
         ChangeInfo {
-            id: String::new(),
             project: project.to_owned(),
-            branch: "main".to_owned(),
-            subject: String::new(),
             status: ChangeStatus::Merged,
-            created: ts(submitted),
             updated: ts(submitted),
             submitted: Some(ts(submitted)),
             insertions: ins,
             deletions: del,
-            number: 1,
             more_changes: None,
             messages: vec![],
         }
@@ -432,7 +420,6 @@ mod tests {
 
         let last = stats.heatmap.weeks.last().unwrap();
         assert_eq!(last.count, 1);
-        assert_eq!(last.lines_changed, 15);
         assert_eq!(last.week_start.to_string(), "2024-06-10");
     }
 
@@ -459,7 +446,6 @@ mod tests {
         let stats = compute(&changes, &[], now);
         let last = stats.heatmap.weeks.last().unwrap();
         assert_eq!(last.count, 3);
-        assert_eq!(last.lines_changed, 3 + 1 + 2 + 4 + 1 + 1);
     }
 
     #[test]
@@ -547,7 +533,6 @@ mod tests {
             week_start: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
             count,
             review_count,
-            lines_changed: 0,
             family_counts: HashMap::new(),
         }
     }

@@ -475,14 +475,19 @@ fn rect_elements(h: &Heatmap, families: &[String], multi_color: bool) -> String 
 
         // Tooltip text.
         let date_str = bucket.week_start.format("%Y-%m-%d").to_string();
+        let merged = bucket.count - bucket.review_count;
+        let reviews = bucket.review_count;
         let tooltip = if bucket.count == 0 {
-            format!("No CLs – week of {date_str}")
+            format!("No activity – week of {date_str}")
         } else {
-            format!(
-                "{} CL{} – week of {date_str}",
-                bucket.count,
-                if bucket.count == 1 { "" } else { "s" }
-            )
+            let mut parts = Vec::new();
+            if merged > 0 {
+                parts.push(format!("{} CL{}", merged, if merged == 1 { "" } else { "s" }));
+            }
+            if reviews > 0 {
+                parts.push(format!("{} review{}", reviews, if reviews == 1 { "" } else { "s" }));
+            }
+            format!("{} – week of {date_str}", parts.join(", "))
         };
 
         out.push_str(&format!(
@@ -588,17 +593,12 @@ mod tests {
             let d = NaiveDate::parse_from_str(date, "%Y-%m-%d").unwrap();
             let ts = d.and_hms_opt(12, 0, 0).unwrap().and_utc();
             ChangeInfo {
-                id: String::new(),
                 project: project.to_owned(),
-                branch: "main".to_owned(),
-                subject: String::new(),
                 status: ChangeStatus::Merged,
-                created: ts,
                 updated: ts,
                 submitted: Some(ts),
                 insertions: 1,
                 deletions: 0,
-                number: 1,
                 more_changes: None,
                 messages: vec![],
             }

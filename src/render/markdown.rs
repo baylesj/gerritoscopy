@@ -144,17 +144,12 @@ mod tests {
 
     fn merged_cl(project: &str, submitted: &str, ins: i32, del: i32) -> ChangeInfo {
         ChangeInfo {
-            id: String::new(),
             project: project.to_owned(),
-            branch: "main".to_owned(),
-            subject: String::new(),
             status: ChangeStatus::Merged,
-            created: ts(submitted),
             updated: ts(submitted),
             submitted: Some(ts(submitted)),
             insertions: ins,
             deletions: del,
-            number: 1,
             more_changes: None,
             messages: vec![],
         }
