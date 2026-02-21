@@ -7,7 +7,7 @@
 
 use anyhow::{bail, Result};
 
-use crate::render::month_label_positions;
+// use crate::render::month_label_positions;
 use crate::stats::{Heatmap, Stats};
 
 // ---------------------------------------------------------------------------
@@ -399,6 +399,11 @@ fn palette_vars_inner(p: &Palette) -> Vec<String> {
         format!("--l3:{};", p.levels[3]),
         format!("--l4:{};", p.levels[4]),
     ]
+}
+
+fn month_label_positions(h: &Heatmap) -> Vec<(u32, String)> {
+    // TODO: implement.
+    vec![]
 }
 
 /// Build the month-label `<text>` elements row.

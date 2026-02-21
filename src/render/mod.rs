@@ -1,6 +1,7 @@
 //! Shared rendering utilities used by all output backends.
 
 pub mod markdown;
+pub mod svg;
 
 use chrono::Datelike;
 
