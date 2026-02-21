@@ -1,6 +1,6 @@
-# gerritoscopy
+# gerritoscope
 
-![CI](https://github.com/baylesj/gerritoscopy/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/baylesj/gerritoscope/actions/workflows/ci.yml/badge.svg)
 
 A Rust CLI — and reusable GitHub Action — that fetches contribution data from one or
 more Gerrit instances and renders a GitHub-profile heatmap card as an SVG, plus an
@@ -8,7 +8,7 @@ optional markdown report.
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  gerritoscopy · you@example.com                            │
+│  gerritoscope · you@example.com                            │
 │  hosts: chromium                                           │
 └────────────────────────────────────────────────────────────┘
 
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate heatmap
-        uses: baylesj/gerritoscopy@main
+        uses: baylesj/gerritoscope@main
         with:
           owner: you@example.com      # your Gerrit account email
           hosts: chromium             # comma-separated aliases or URLs
@@ -83,7 +83,7 @@ jobs:
 Store your HTTP password as a repository secret (`GERRIT_PASSWORD`) and pass it in:
 
 ```yaml
-- uses: baylesj/gerritoscopy@main
+- uses: baylesj/gerritoscope@main
   with:
     owner: your-username
     hosts: https://gerrit.example.com
@@ -146,20 +146,20 @@ Example invocations:
 
 ```bash
 # Fetch from Chromium and write an SVG
-gerritoscopy --owner you@example.com --output-svg heatmap.svg
+gerritoscope --owner you@example.com --output-svg heatmap.svg
 
 # Multiple hosts, dark theme
-gerritoscopy --owner you@example.com --hosts chromium,go --svg-theme github-dark --output-svg heatmap.svg
+gerritoscope --owner you@example.com --hosts chromium,go --svg-theme github-dark --output-svg heatmap.svg
 
 # Private instance with Basic Auth
-gerritoscopy --owner your-username \
+gerritoscope --owner your-username \
   --hosts https://gerrit.example.com \
   --username your-username \
   --password your-http-password \
   --output-svg heatmap.svg
 
 # Only changes since a given date
-gerritoscopy --owner you@example.com --after 2024-01-01 --output-svg heatmap.svg
+gerritoscope --owner you@example.com --after 2024-01-01 --output-svg heatmap.svg
 ```
 
 ## License
