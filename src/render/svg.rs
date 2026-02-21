@@ -402,8 +402,22 @@ fn palette_vars_inner(p: &Palette) -> Vec<String> {
 }
 
 fn month_label_positions(h: &Heatmap) -> Vec<(u32, String)> {
-    // TODO: implement.
-    vec![]
+    let mut positions = Vec::new();
+    let mut last_month = 0u32;
+    let mut last_col = 0usize;
+
+    for (i, b) in h.weeks.iter().enumerate() {
+        let m = b.week_start.month();
+        if m != last_month {
+            if i == 0 || i >= last_col + 4 {
+                positions.push((i as u32, super::month_abbr(m).to_owned()));
+                last_col = i;
+            }
+            last_month = m;
+        }
+    }
+
+    positions
 }
 
 /// Build the month-label `<text>` elements row.
