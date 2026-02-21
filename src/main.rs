@@ -96,8 +96,7 @@ async fn main() -> Result<()> {
         changes.sort_by_key(|c| c.submitted.unwrap_or(c.updated));
     }
 
-    let heatmap_after = (chrono::Utc::now() - chrono::Duration::weeks(54))
-        .date_naive();
+    let heatmap_after = (chrono::Utc::now() - chrono::Duration::weeks(54)).date_naive();
 
     let reviews: Vec<ReviewEvent> = if args.skip_reviews {
         vec![]

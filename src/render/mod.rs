@@ -47,10 +47,7 @@ pub fn heatmap_header(h: &Heatmap) -> String {
 ///
 /// Example: `"  ░▒░ ░░░░░░░ ░░ ░  ░▒ ░ ░  ░░░ ░░ ░▒█▓░█▓▓░▒▓▓  █▓▓"`
 pub fn heatmap_body(h: &Heatmap) -> String {
-    h.weeks
-        .iter()
-        .map(|b| BLOCKS[b.level() as usize])
-        .collect()
+    h.weeks.iter().map(|b| BLOCKS[b.level() as usize]).collect()
 }
 
 /// Full markdown code-block for the heatmap, ready to embed in a template.

@@ -552,7 +552,7 @@ mod tests {
         assert_eq!(bucket(9, 0).level(), 3); // L3
         assert_eq!(bucket(10, 0).level(), 4); // L4
         assert_eq!(bucket(20, 0).level(), 4); // L4
-        // reviews count the same as CLs
+                                              // reviews count the same as CLs
         assert_eq!(bucket(3, 3).level(), 2); // 3 reviews → L2
         assert_eq!(bucket(6, 6).level(), 3); // 6 reviews → L3
         assert_eq!(bucket(10, 10).level(), 4); // 10 reviews → L4

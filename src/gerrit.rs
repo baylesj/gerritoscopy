@@ -116,9 +116,7 @@ impl GerritClient {
                         .messages
                         .iter()
                         .filter(|m| {
-                            m.author
-                                .as_ref()
-                                .and_then(|a| a.email.as_deref())
+                            m.author.as_ref().and_then(|a| a.email.as_deref())
                                 == Some(query.reviewer.as_str())
                         })
                         .map(|m| m.date)

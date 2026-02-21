@@ -482,10 +482,18 @@ fn rect_elements(h: &Heatmap, families: &[String], multi_color: bool) -> String 
         } else {
             let mut parts = Vec::new();
             if merged > 0 {
-                parts.push(format!("{} CL{}", merged, if merged == 1 { "" } else { "s" }));
+                parts.push(format!(
+                    "{} CL{}",
+                    merged,
+                    if merged == 1 { "" } else { "s" }
+                ));
             }
             if reviews > 0 {
-                parts.push(format!("{} review{}", reviews, if reviews == 1 { "" } else { "s" }));
+                parts.push(format!(
+                    "{} review{}",
+                    reviews,
+                    if reviews == 1 { "" } else { "s" }
+                ));
             }
             format!("{} – week of {date_str}", parts.join(", "))
         };
@@ -511,7 +519,11 @@ mod tests {
     use chrono::{NaiveDate, TimeZone, Utc};
 
     fn empty_stats() -> Stats {
-        stats::compute(&[], &[], Utc.with_ymd_and_hms(2024, 6, 12, 12, 0, 0).unwrap())
+        stats::compute(
+            &[],
+            &[],
+            Utc.with_ymd_and_hms(2024, 6, 12, 12, 0, 0).unwrap(),
+        )
     }
 
     fn hosts_one() -> Vec<(String, String)> {
