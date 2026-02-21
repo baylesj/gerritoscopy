@@ -319,7 +319,7 @@ fn title_text(owner: &str, hosts: &[(String, String)]) -> String {
 fn stats_line(stats: &Stats, h: &Heatmap) -> String {
     use crate::render::fmt_count;
     format!(
-        "{} merged · {}/90d · {} reviewed · +{}/−{} · {}wk streak",
+        "{} merged · {}/90d · {} reviewed · <tspan fill=\"#3fb950\">+{}</tspan>/<tspan fill=\"#f85149\">−{}</tspan> · {}wk streak",
         fmt_count(stats.total_merged as i64),
         fmt_count(stats.recent_merged_90d as i64),
         fmt_count(stats.recent_reviews_90d as i64),

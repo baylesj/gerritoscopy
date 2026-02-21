@@ -236,6 +236,10 @@ fn build_query(args: &Args) -> Result<ChangeQuery> {
 // Terminal report
 // ---------------------------------------------------------------------------
 
+const GREEN: &str = "\x1b[32m";
+const RED: &str = "\x1b[31m";
+const RESET: &str = "\x1b[0m";
+
 fn print_report(owner: &str, hosts: &[(String, String)], s: &Stats) {
     let width = 60;
     let bar = "─".repeat(width);
@@ -266,12 +270,12 @@ fn print_report(owner: &str, hosts: &[(String, String)], s: &Stats) {
         fmt_count(s.recent_reviews_90d as i64),
     );
     println!(
-        "  Streak             current {} wks ·   longest {} wks",
+        "  Streak             current {} wks ·    longest {} wks",
         s.heatmap.current_streak(),
         s.heatmap.longest_streak(),
     );
     println!(
-        "  Lines changed      +{} / -{}",
+        "  Lines changed      {GREEN}+{}{RESET} / {RED}-{}{RESET}",
         fmt_count(s.total_insertions),
         fmt_count(s.total_deletions),
     );
@@ -281,7 +285,7 @@ fn print_report(owner: &str, hosts: &[(String, String)], s: &Stats) {
         println!("  Top projects");
         for p in &s.top_projects {
             println!(
-                "    {:<36} {:>5} CLs  +{} / -{}",
+                "    {:<36} {:>5} CLs  {GREEN}+{}{RESET} / {RED}-{}{RESET}",
                 truncate(&p.name, 36),
                 fmt_count(p.merged as i64),
                 fmt_count(p.insertions),
