@@ -49,6 +49,19 @@ struct Args {
     /// Write a markdown report to this file.
     #[arg(long)]
     output_md: Option<PathBuf>,
+
+    /// Write an SVG heatmap card to this file.
+    #[arg(long)]
+    output_svg: Option<PathBuf>,
+
+    /// Theme for the SVG card (github, github-light, github-dark, solarized-light,
+    /// solarized-dark, gruvbox-dark, gruvbox-light, tokyo-night, dracula, catppuccin-mocha).
+    #[arg(long, default_value = "github")]
+    svg_theme: String,
+
+    /// Colour each heatmap cell by the dominant Gerrit host/project family.
+    #[arg(long)]
+    svg_multi_color: bool,
 }
 
 // ---------------------------------------------------------------------------
@@ -85,6 +98,16 @@ async fn main() -> Result<()> {
     if let Some(ref path) = args.output_md {
         let md = render::markdown::render(&args.owner, &resolved, &stats)?;
         std::fs::write(path, &md).with_context(|| format!("writing {}", path.display()))?;
+        eprintln!("wrote {}", path.display());
+    }
+
+    if let Some(ref path) = args.output_svg {
+        let opts = render::svg::SvgOptions {
+            theme: &args.svg_theme,
+            multi_color: args.svg_multi_color,
+        };
+        let svg = render::svg::render(&args.owner, &resolved, &stats, &opts)?;
+        std::fs::write(path, &svg).with_context(|| format!("writing {}", path.display()))?;
         eprintln!("wrote {}", path.display());
     }
 

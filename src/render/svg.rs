@@ -6,8 +6,8 @@
 //! light and dark palettes.
 
 use anyhow::{bail, Result};
+use chrono::Datelike;
 
-// use crate::render::month_label_positions;
 use crate::stats::{Heatmap, Stats};
 
 // ---------------------------------------------------------------------------
@@ -16,11 +16,11 @@ use crate::stats::{Heatmap, Stats};
 
 /// A complete colour palette for one display mode (light or dark).
 pub struct Palette {
-    pub bg:     &'static str,
+    pub bg: &'static str,
     pub border: &'static str,
-    pub title:  &'static str,
-    pub text:   &'static str,
-    pub muted:  &'static str,
+    pub title: &'static str,
+    pub text: &'static str,
+    pub muted: &'static str,
     /// Heatmap intensity colours: `levels[0]` is "empty", `levels[4]` is peak.
     pub levels: [&'static str; 5],
 }
@@ -40,117 +40,117 @@ pub enum Theme {
 
 static GITHUB: Theme = Theme::Auto {
     light: Palette {
-        bg:     "#ffffff",
+        bg: "#ffffff",
         border: "#d0d7de",
-        title:  "#24292f",
-        text:   "#57606a",
-        muted:  "#6e7781",
+        title: "#24292f",
+        text: "#57606a",
+        muted: "#6e7781",
         levels: ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
     },
     dark: Palette {
-        bg:     "#0d1117",
+        bg: "#0d1117",
         border: "#30363d",
-        title:  "#c9d1d9",
-        text:   "#8b949e",
-        muted:  "#6e7781",
+        title: "#c9d1d9",
+        text: "#8b949e",
+        muted: "#6e7781",
         levels: ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"],
     },
 };
 
 static GITHUB_LIGHT: Theme = Theme::Fixed(Palette {
-    bg:     "#ffffff",
+    bg: "#ffffff",
     border: "#d0d7de",
-    title:  "#24292f",
-    text:   "#57606a",
-    muted:  "#6e7781",
+    title: "#24292f",
+    text: "#57606a",
+    muted: "#6e7781",
     levels: ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
 });
 
 static GITHUB_DARK: Theme = Theme::Fixed(Palette {
-    bg:     "#0d1117",
+    bg: "#0d1117",
     border: "#30363d",
-    title:  "#c9d1d9",
-    text:   "#8b949e",
-    muted:  "#6e7781",
+    title: "#c9d1d9",
+    text: "#8b949e",
+    muted: "#6e7781",
     levels: ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"],
 });
 
 static SOLARIZED_LIGHT: Theme = Theme::Fixed(Palette {
-    bg:     "#fdf6e3",
+    bg: "#fdf6e3",
     border: "#93a1a1",
-    title:  "#073642",
-    text:   "#657b83",
-    muted:  "#93a1a1",
+    title: "#073642",
+    text: "#657b83",
+    muted: "#93a1a1",
     levels: ["#eee8d5", "#b5d5a8", "#6dbf67", "#3a9443", "#1a6e29"],
 });
 
 static SOLARIZED_DARK: Theme = Theme::Fixed(Palette {
-    bg:     "#002b36",
+    bg: "#002b36",
     border: "#073642",
-    title:  "#93a1a1",
-    text:   "#657b83",
-    muted:  "#586e75",
+    title: "#93a1a1",
+    text: "#657b83",
+    muted: "#586e75",
     levels: ["#073642", "#0a3828", "#0a6640", "#1a8c52", "#2ab567"],
 });
 
 static GRUVBOX_DARK: Theme = Theme::Fixed(Palette {
-    bg:     "#282828",
+    bg: "#282828",
     border: "#504945",
-    title:  "#ebdbb2",
-    text:   "#a89984",
-    muted:  "#7c6f64",
+    title: "#ebdbb2",
+    text: "#a89984",
+    muted: "#7c6f64",
     levels: ["#3c3836", "#1d4a26", "#2d6a2f", "#3d8c3d", "#52b452"],
 });
 
 static GRUVBOX_LIGHT: Theme = Theme::Fixed(Palette {
-    bg:     "#fbf1c7",
+    bg: "#fbf1c7",
     border: "#d5c4a1",
-    title:  "#3c3836",
-    text:   "#665c54",
-    muted:  "#928374",
+    title: "#3c3836",
+    text: "#665c54",
+    muted: "#928374",
     levels: ["#f2e5bc", "#b8d8a8", "#6dbf67", "#3a9443", "#1a6e29"],
 });
 
 static TOKYO_NIGHT: Theme = Theme::Fixed(Palette {
-    bg:     "#1a1b26",
+    bg: "#1a1b26",
     border: "#292e42",
-    title:  "#c0caf5",
-    text:   "#a9b1d6",
-    muted:  "#565f89",
+    title: "#c0caf5",
+    text: "#a9b1d6",
+    muted: "#565f89",
     levels: ["#24283b", "#0d3b2e", "#1a6b3c", "#26a651", "#39d353"],
 });
 
 static DRACULA: Theme = Theme::Fixed(Palette {
-    bg:     "#282a36",
+    bg: "#282a36",
     border: "#44475a",
-    title:  "#f8f8f2",
-    text:   "#6272a4",
-    muted:  "#44475a",
+    title: "#f8f8f2",
+    text: "#6272a4",
+    muted: "#44475a",
     levels: ["#44475a", "#1a3d2b", "#2d6a35", "#3d9140", "#50bd55"],
 });
 
 static CATPPUCCIN_MOCHA: Theme = Theme::Fixed(Palette {
-    bg:     "#1e1e2e",
+    bg: "#1e1e2e",
     border: "#313244",
-    title:  "#cdd6f4",
-    text:   "#a6adc8",
-    muted:  "#6c7086",
+    title: "#cdd6f4",
+    text: "#a6adc8",
+    muted: "#6c7086",
     levels: ["#313244", "#1a4731", "#1f6e3c", "#2a9c51", "#39d353"],
 });
 
 /// Look up a built-in theme by CLI name.
 pub fn theme_by_name(name: &str) -> Result<&'static Theme> {
     match name {
-        "github"            => Ok(&GITHUB),
-        "github-light"      => Ok(&GITHUB_LIGHT),
-        "github-dark"       => Ok(&GITHUB_DARK),
-        "solarized-light"   => Ok(&SOLARIZED_LIGHT),
-        "solarized-dark"    => Ok(&SOLARIZED_DARK),
-        "gruvbox-dark"      => Ok(&GRUVBOX_DARK),
-        "gruvbox-light"     => Ok(&GRUVBOX_LIGHT),
-        "tokyo-night"       => Ok(&TOKYO_NIGHT),
-        "dracula"           => Ok(&DRACULA),
-        "catppuccin-mocha"  => Ok(&CATPPUCCIN_MOCHA),
+        "github" => Ok(&GITHUB),
+        "github-light" => Ok(&GITHUB_LIGHT),
+        "github-dark" => Ok(&GITHUB_DARK),
+        "solarized-light" => Ok(&SOLARIZED_LIGHT),
+        "solarized-dark" => Ok(&SOLARIZED_DARK),
+        "gruvbox-dark" => Ok(&GRUVBOX_DARK),
+        "gruvbox-light" => Ok(&GRUVBOX_LIGHT),
+        "tokyo-night" => Ok(&TOKYO_NIGHT),
+        "dracula" => Ok(&DRACULA),
+        "catppuccin-mocha" => Ok(&CATPPUCCIN_MOCHA),
         other => bail!(
             "unknown theme {:?}; valid names: github, github-light, github-dark, \
              solarized-light, solarized-dark, gruvbox-dark, gruvbox-light, \
@@ -169,17 +169,35 @@ pub fn theme_by_name(name: &str) -> Result<&'static Theme> {
 /// Index layout: `[light_levels_1_4..., dark_levels_1_4...]`
 const FAMILY_PALETTES: &[([&str; 4], [&str; 4])] = &[
     // green
-    (["#9be9a8", "#40c463", "#30a14e", "#216e39"], ["#0e4429", "#006d32", "#26a641", "#39d353"]),
+    (
+        ["#9be9a8", "#40c463", "#30a14e", "#216e39"],
+        ["#0e4429", "#006d32", "#26a641", "#39d353"],
+    ),
     // blue
-    (["#a8d8f0", "#5ba3d9", "#1a6eb5", "#0d4a8c"], ["#0d2940", "#0d4a8c", "#1a6eb5", "#2e93d9"]),
+    (
+        ["#a8d8f0", "#5ba3d9", "#1a6eb5", "#0d4a8c"],
+        ["#0d2940", "#0d4a8c", "#1a6eb5", "#2e93d9"],
+    ),
     // purple
-    (["#d4b8f0", "#a370d9", "#7a3cba", "#531e8c"], ["#2a1040", "#4d1e8c", "#7a3cba", "#a855d9"]),
+    (
+        ["#d4b8f0", "#a370d9", "#7a3cba", "#531e8c"],
+        ["#2a1040", "#4d1e8c", "#7a3cba", "#a855d9"],
+    ),
     // orange
-    (["#ffd199", "#ffaa44", "#e07b00", "#a85200"], ["#401d00", "#8c3d00", "#cc6600", "#ff8c1a"]),
+    (
+        ["#ffd199", "#ffaa44", "#e07b00", "#a85200"],
+        ["#401d00", "#8c3d00", "#cc6600", "#ff8c1a"],
+    ),
     // red
-    (["#ffb3b3", "#ff6666", "#cc1a1a", "#991111"], ["#3d0000", "#8c0d0d", "#cc2222", "#e84444"]),
+    (
+        ["#ffb3b3", "#ff6666", "#cc1a1a", "#991111"],
+        ["#3d0000", "#8c0d0d", "#cc2222", "#e84444"],
+    ),
     // teal
-    (["#a8f0e8", "#3dd9c8", "#1aab99", "#0d7a6d"], ["#0d2e2b", "#0d6b60", "#1aab99", "#2dd4bf"]),
+    (
+        ["#a8f0e8", "#3dd9c8", "#1aab99", "#0d7a6d"],
+        ["#0d2e2b", "#0d6b60", "#1aab99", "#2dd4bf"],
+    ),
 ];
 
 // ---------------------------------------------------------------------------
@@ -196,7 +214,10 @@ pub struct SvgOptions<'a> {
 
 impl Default for SvgOptions<'static> {
     fn default() -> Self {
-        SvgOptions { theme: "github", multi_color: false }
+        SvgOptions {
+            theme: "github",
+            multi_color: false,
+        }
     }
 }
 
@@ -337,24 +358,16 @@ fn css_block(theme: &Theme, families: &[String], multi_color: bool) -> String {
         for (fi, _family) in families.iter().enumerate() {
             let palette_idx = fi % FAMILY_PALETTES.len();
             let (light_lvls, dark_lvls) = &FAMILY_PALETTES[palette_idx];
-            // Light (default)
+            // Light (default) — variables must live inside :root {}.
+            css.push_str(":root {\n");
             for (li, color) in light_lvls.iter().enumerate() {
-                css.push_str(&format!(
-                    "  --f{fi}-l{}:{};\n",
-                    li + 1,
-                    color
-                ));
+                css.push_str(&format!("  --f{fi}-l{}:{};\n", li + 1, color));
             }
-            // Dark override
-            css.push_str(&format!(
-                "@media (prefers-color-scheme: dark) {{\n  :root {{\n"
-            ));
+            css.push_str("}\n");
+            // Dark override.
+            css.push_str("@media (prefers-color-scheme: dark) {\n  :root {\n");
             for (li, color) in dark_lvls.iter().enumerate() {
-                css.push_str(&format!(
-                    "    --f{fi}-l{}:{};\n",
-                    li + 1,
-                    color
-                ));
+                css.push_str(&format!("    --f{fi}-l{}:{};\n", li + 1, color));
             }
             css.push_str("  }\n}\n");
         }
@@ -402,8 +415,22 @@ fn palette_vars_inner(p: &Palette) -> Vec<String> {
 }
 
 fn month_label_positions(h: &Heatmap) -> Vec<(u32, String)> {
-    // TODO: implement.
-    vec![]
+    let mut positions = Vec::new();
+    let mut last_month = 0u32;
+    let mut last_col = 0usize;
+
+    for (i, b) in h.weeks.iter().enumerate() {
+        let m = b.week_start.month();
+        if m != last_month {
+            if i == 0 || i >= last_col + 4 {
+                positions.push((i as u32, super::month_abbr(m).to_owned()));
+                last_col = i;
+            }
+            last_month = m;
+        }
+    }
+
+    positions
 }
 
 /// Build the month-label `<text>` elements row.
@@ -450,7 +477,11 @@ fn rect_elements(h: &Heatmap, families: &[String], multi_color: bool) -> String 
         let tooltip = if bucket.count == 0 {
             format!("No CLs – week of {date_str}")
         } else {
-            format!("{} CL{} – week of {date_str}", bucket.count, if bucket.count == 1 { "" } else { "s" })
+            format!(
+                "{} CL{} – week of {date_str}",
+                bucket.count,
+                if bucket.count == 1 { "" } else { "s" }
+            )
         };
 
         out.push_str(&format!(
@@ -471,7 +502,7 @@ mod tests {
     use super::*;
     use crate::gerrit::{ChangeInfo, ChangeStatus};
     use crate::stats;
-    use chrono::{NaiveDate, Utc, TimeZone};
+    use chrono::{NaiveDate, TimeZone, Utc};
     use std::collections::HashMap;
 
     fn empty_stats() -> Stats {
@@ -479,7 +510,10 @@ mod tests {
     }
 
     fn hosts_one() -> Vec<(String, String)> {
-        vec![("chromium".to_owned(), "https://chromium-review.googlesource.com".to_owned())]
+        vec![(
+            "chromium".to_owned(),
+            "https://chromium-review.googlesource.com".to_owned(),
+        )]
     }
 
     fn opts_default() -> SvgOptions<'static> {
@@ -505,7 +539,10 @@ mod tests {
         // Count occurrences of `<rect` — the background rect + 52 week rects.
         // The background rect does not have class="week", so we count class="week"
         let week_rects = svg.matches("class=\"week").count();
-        assert_eq!(week_rects, 52, "expected 52 week rect elements, got {week_rects}");
+        assert_eq!(
+            week_rects, 52,
+            "expected 52 week rect elements, got {week_rects}"
+        );
     }
 
     #[test]
@@ -528,7 +565,10 @@ mod tests {
     #[test]
     fn fixed_theme_has_no_media_query() {
         let stats = empty_stats();
-        let opts = SvgOptions { theme: "github-dark", multi_color: false };
+        let opts = SvgOptions {
+            theme: "github-dark",
+            multi_color: false,
+        };
         let svg = render("test@example.com", &hosts_one(), &stats, &opts).unwrap();
         assert!(
             !svg.contains("prefers-color-scheme"),
@@ -564,7 +604,10 @@ mod tests {
         }
         let changes = vec![cl("alpha", "2024-06-10"), cl("beta", "2024-06-03")];
         let s = stats::compute(&changes, now);
-        let opts = SvgOptions { theme: "github", multi_color: true };
+        let opts = SvgOptions {
+            theme: "github",
+            multi_color: true,
+        };
         let svg = render("test@example.com", &hosts_one(), &s, &opts).unwrap();
         // At least one rect should have a family class like "f0" or "f1".
         assert!(
@@ -585,10 +628,16 @@ mod tests {
     #[test]
     fn all_builtin_themes_resolve() {
         for name in &[
-            "github", "github-light", "github-dark",
-            "solarized-light", "solarized-dark",
-            "gruvbox-dark", "gruvbox-light",
-            "tokyo-night", "dracula", "catppuccin-mocha",
+            "github",
+            "github-light",
+            "github-dark",
+            "solarized-light",
+            "solarized-dark",
+            "gruvbox-dark",
+            "gruvbox-light",
+            "tokyo-night",
+            "dracula",
+            "catppuccin-mocha",
         ] {
             assert!(theme_by_name(name).is_ok(), "theme {name:?} should resolve");
         }
@@ -599,6 +648,9 @@ mod tests {
         let now = Utc.with_ymd_and_hms(2024, 6, 12, 12, 0, 0).unwrap();
         let stats = stats::compute(&[], now);
         let svg = render("test@example.com", &hosts_one(), &stats, &opts_default()).unwrap();
-        assert!(svg.contains("<title>"), "rects should contain <title> tooltip elements");
+        assert!(
+            svg.contains("<title>"),
+            "rects should contain <title> tooltip elements"
+        );
     }
 }
