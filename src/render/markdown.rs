@@ -157,9 +157,9 @@ mod tests {
 
     fn sample_stats() -> Stats {
         let changes = vec![
-            merged_cl("chromium/src",    "2024-06-03", 100, 20),
-            merged_cl("openscreen",      "2024-06-05", 50,  10),
-            merged_cl("openscreen/quic", "2024-06-06", 30,  5),
+            merged_cl("chromium/src", "2024-06-03", 100, 20),
+            merged_cl("openscreen", "2024-06-05", 50, 10),
+            merged_cl("openscreen/quic", "2024-06-06", 30, 5),
         ];
         crate::stats::compute(&changes, ts("2024-06-12"))
     }
@@ -175,39 +175,71 @@ mod tests {
     #[test]
     fn render_produces_non_empty_string() {
         let stats = sample_stats();
-        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
+        let md = render(
+            "alice@example.com",
+            &single_host("https://example-review.example.com"),
+            &stats,
+        )
+        .unwrap();
         assert!(!md.is_empty());
     }
 
     #[test]
     fn render_contains_owner() {
         let stats = sample_stats();
-        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
-        assert!(md.contains("alice@example.com"), "owner missing from output");
+        let md = render(
+            "alice@example.com",
+            &single_host("https://example-review.example.com"),
+            &stats,
+        )
+        .unwrap();
+        assert!(
+            md.contains("alice@example.com"),
+            "owner missing from output"
+        );
     }
 
     #[test]
     fn render_contains_heatmap_fence() {
         let stats = sample_stats();
-        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
+        let md = render(
+            "alice@example.com",
+            &single_host("https://example-review.example.com"),
+            &stats,
+        )
+        .unwrap();
         assert!(md.contains("```\n"), "opening code fence missing");
         // Count fence occurrences — should have opening and closing.
-        assert_eq!(md.matches("```").count(), 2, "expected exactly one fenced block");
+        assert_eq!(
+            md.matches("```").count(),
+            2,
+            "expected exactly one fenced block"
+        );
     }
 
     #[test]
     fn render_contains_top_project_names() {
         let stats = sample_stats();
-        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
-        assert!(md.contains("chromium/src"),    "chromium/src missing");
-        assert!(md.contains("openscreen"),       "openscreen missing");
-        assert!(md.contains("openscreen/quic"),  "openscreen/quic missing");
+        let md = render(
+            "alice@example.com",
+            &single_host("https://example-review.example.com"),
+            &stats,
+        )
+        .unwrap();
+        assert!(md.contains("chromium/src"), "chromium/src missing");
+        assert!(md.contains("openscreen"), "openscreen missing");
+        assert!(md.contains("openscreen/quic"), "openscreen/quic missing");
     }
 
     #[test]
     fn render_contains_stats_table_headers() {
         let stats = sample_stats();
-        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
+        let md = render(
+            "alice@example.com",
+            &single_host("https://example-review.example.com"),
+            &stats,
+        )
+        .unwrap();
         assert!(md.contains("Merged (all time)"));
         assert!(md.contains("Last 90 days"));
         assert!(md.contains("Lines added"));
@@ -217,9 +249,17 @@ mod tests {
     #[test]
     fn render_host_display_strips_protocol() {
         let stats = sample_stats();
-        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
+        let md = render(
+            "alice@example.com",
+            &single_host("https://example-review.example.com"),
+            &stats,
+        )
+        .unwrap();
         // The link text should not include "https://".
-        assert!(md.contains("[example-review.example.com]"), "protocol not stripped from link text");
+        assert!(
+            md.contains("[example-review.example.com]"),
+            "protocol not stripped from link text"
+        );
         assert!(!md.contains("[https://"), "protocol leaked into link text");
     }
 
@@ -235,12 +275,27 @@ mod tests {
     fn render_multi_host_footer_uses_aliases() {
         let stats = sample_stats();
         let hosts = vec![
-            ("chromium".to_owned(), "https://chromium-review.googlesource.com".to_owned()),
-            ("go".to_owned(),       "https://go-review.googlesource.com".to_owned()),
+            (
+                "chromium".to_owned(),
+                "https://chromium-review.googlesource.com".to_owned(),
+            ),
+            (
+                "go".to_owned(),
+                "https://go-review.googlesource.com".to_owned(),
+            ),
         ];
         let md = render("alice@example.com", &hosts, &stats).unwrap();
-        assert!(md.contains("[chromium]"), "chromium alias missing from multi-host footer");
-        assert!(md.contains("[go]"),       "go alias missing from multi-host footer");
-        assert!(!md.contains("[https://"), "protocol leaked into multi-host link text");
+        assert!(
+            md.contains("[chromium]"),
+            "chromium alias missing from multi-host footer"
+        );
+        assert!(
+            md.contains("[go]"),
+            "go alias missing from multi-host footer"
+        );
+        assert!(
+            !md.contains("[https://"),
+            "protocol leaked into multi-host link text"
+        );
     }
 }

@@ -117,10 +117,7 @@ impl GerritClient {
             req = req.basic_auth(user, Some(pass));
         }
 
-        let response = req
-            .send()
-            .await
-            .with_context(|| format!("GET {url}"))?;
+        let response = req.send().await.with_context(|| format!("GET {url}"))?;
 
         let status = response.status();
         if !status.is_success() {

@@ -84,8 +84,7 @@ async fn main() -> Result<()> {
 
     if let Some(ref path) = args.output_md {
         let md = render::markdown::render(&args.owner, &resolved, &stats)?;
-        std::fs::write(path, &md)
-            .with_context(|| format!("writing {}", path.display()))?;
+        std::fs::write(path, &md).with_context(|| format!("writing {}", path.display()))?;
         eprintln!("wrote {}", path.display());
     }
 
@@ -174,8 +173,14 @@ fn print_report(owner: &str, hosts: &[(String, String)], s: &Stats) {
     print_heatmap(&s.heatmap);
 
     println!();
-    println!("  Merged CLs     {:>7}  (all time)", fmt_count(s.total_merged as i64));
-    println!("  Last 90 days   {:>7}", fmt_count(s.recent_merged_90d as i64));
+    println!(
+        "  Merged CLs     {:>7}  (all time)",
+        fmt_count(s.total_merged as i64)
+    );
+    println!(
+        "  Last 90 days   {:>7}",
+        fmt_count(s.recent_merged_90d as i64)
+    );
     println!(
         "  Lines changed  +{} / -{}",
         fmt_count(s.total_insertions),

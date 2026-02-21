@@ -8,17 +8,17 @@ use anyhow::{bail, Result};
 
 /// Short alias → canonical base URL for well-known public Gerrit instances.
 pub const KNOWN_HOSTS: &[(&str, &str)] = &[
-    ("chromium",    "https://chromium-review.googlesource.com"),
-    ("android",     "https://android-review.googlesource.com"),
-    ("go",          "https://go-review.googlesource.com"),
-    ("fuchsia",     "https://fuchsia-review.googlesource.com"),
-    ("skia",        "https://skia-review.googlesource.com"),
-    ("gerrit",      "https://gerrit-review.googlesource.com"),
-    ("wikimedia",   "https://gerrit.wikimedia.org"),
-    ("qt",          "https://codereview.qt-project.org"),
+    ("chromium", "https://chromium-review.googlesource.com"),
+    ("android", "https://android-review.googlesource.com"),
+    ("go", "https://go-review.googlesource.com"),
+    ("fuchsia", "https://fuchsia-review.googlesource.com"),
+    ("skia", "https://skia-review.googlesource.com"),
+    ("gerrit", "https://gerrit-review.googlesource.com"),
+    ("wikimedia", "https://gerrit.wikimedia.org"),
+    ("qt", "https://codereview.qt-project.org"),
     ("libreoffice", "https://gerrit.libreoffice.org"),
-    ("onap",        "https://gerrit.onap.org"),
-    ("webrtc",      "https://webrtc-review.googlesource.com"),
+    ("onap", "https://gerrit.onap.org"),
+    ("webrtc", "https://webrtc-review.googlesource.com"),
 ];
 
 // ---------------------------------------------------------------------------

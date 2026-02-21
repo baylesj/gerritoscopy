@@ -50,11 +50,7 @@ impl Heatmap {
     /// Consecutive non-empty weeks running up to (and including) the most
     /// recent bucket.  Zero if the most recent week has no activity.
     pub fn current_streak(&self) -> u32 {
-        self.weeks
-            .iter()
-            .rev()
-            .take_while(|b| b.count > 0)
-            .count() as u32
+        self.weeks.iter().rev().take_while(|b| b.count > 0).count() as u32
     }
 
     /// Longest run of consecutive non-empty weeks anywhere in the window.
@@ -648,7 +644,10 @@ mod tests {
         assert_eq!(project_family("chromium::chromium/src"), "chromium");
         assert_eq!(project_family("chromium::openscreen/quic"), "chromium");
         assert_eq!(project_family("go::cmd/go"), "go");
-        assert_eq!(project_family("android::platform/frameworks/base"), "android");
+        assert_eq!(
+            project_family("android::platform/frameworks/base"),
+            "android"
+        );
     }
 
     #[test]
@@ -666,9 +665,9 @@ mod tests {
     fn family_counts_rolls_sub_repos_into_parent() {
         let now = ts("2024-06-12");
         let changes = vec![
-            merged_cl("openscreen",      "2024-06-10", 1, 0),
+            merged_cl("openscreen", "2024-06-10", 1, 0),
             merged_cl("openscreen/quic", "2024-06-10", 1, 0),
-            merged_cl("chromium/src",    "2024-06-10", 1, 0),
+            merged_cl("chromium/src", "2024-06-10", 1, 0),
         ];
         let stats = compute(&changes, now);
         let last = stats.heatmap.weeks.last().unwrap();
@@ -692,9 +691,9 @@ mod tests {
     fn dominant_family_returns_highest_count() {
         let now = ts("2024-06-12");
         let changes = vec![
-            merged_cl("openscreen",      "2024-06-10", 1, 0),
+            merged_cl("openscreen", "2024-06-10", 1, 0),
             merged_cl("openscreen/quic", "2024-06-10", 1, 0),
-            merged_cl("chromium/src",    "2024-06-10", 1, 0),
+            merged_cl("chromium/src", "2024-06-10", 1, 0),
         ];
         let stats = compute(&changes, now);
         // openscreen (2 CLs) beats chromium (1 CL).
@@ -715,15 +714,18 @@ mod tests {
         // project_family grouping must NOT bleed into top_projects.
         let now = ts("2024-06-12");
         let changes = vec![
-            merged_cl("openscreen",      "2024-06-10", 1, 0),
+            merged_cl("openscreen", "2024-06-10", 1, 0),
             merged_cl("openscreen/quic", "2024-06-10", 1, 0),
         ];
         let stats = compute(&changes, now);
         let names: Vec<&str> = stats.top_projects.iter().map(|p| p.name.as_str()).collect();
         // Both full repo names must be preserved — family grouping must not
         // rename or merge entries in the top_projects list.
-        assert!(names.contains(&"openscreen"),      "openscreen missing");
-        assert!(names.contains(&"openscreen/quic"), "openscreen/quic missing");
+        assert!(names.contains(&"openscreen"), "openscreen missing");
+        assert!(
+            names.contains(&"openscreen/quic"),
+            "openscreen/quic missing"
+        );
         assert_eq!(stats.top_projects.len(), 2);
     }
 }
