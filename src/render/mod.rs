@@ -49,7 +49,7 @@ pub fn heatmap_header(h: &Heatmap) -> String {
 pub fn heatmap_body(h: &Heatmap) -> String {
     h.weeks
         .iter()
-        .map(|b| BLOCKS[b.level(h.max_count) as usize])
+        .map(|b| BLOCKS[b.level() as usize])
         .collect()
 }
 
@@ -142,6 +142,7 @@ mod tests {
                     week_start: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap()
                         + chrono::Duration::weeks(i as i64),
                     count: 0,
+                    review_count: 0,
                     lines_changed: 0,
                     family_counts: HashMap::new(),
                 })

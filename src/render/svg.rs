@@ -455,7 +455,7 @@ fn rect_elements(h: &Heatmap, families: &[String], multi_color: bool) -> String 
     for (i, bucket) in h.weeks.iter().enumerate() {
         let x = GRID_LEFT + i as u32 * CELL;
         let y = GRID_TOP;
-        let level = bucket.level(h.max_count);
+        let level = bucket.level();
 
         // Determine CSS class string.
         let class = if multi_color && level > 0 {

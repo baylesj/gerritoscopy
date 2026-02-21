@@ -78,8 +78,12 @@ impl Heatmap {
 pub struct WeekBucket {
     /// The Monday that starts this ISO week.
     pub week_start: NaiveDate,
-    /// Number of CLs merged during this week.
+    /// Total contributions (merged CLs + reviews) during this week.
     pub count: u32,
+    /// Number of those contributions that were reviews (not merges).
+    ///
+    /// Tracked separately so that `level()` can weight reviews more heavily.
+    pub review_count: u32,
     /// Total lines touched (`insertions + deletions`) during this week.
     pub lines_changed: u64,
     /// CL count broken down by project family (see [`project_family`]).
@@ -94,16 +98,25 @@ pub struct WeekBucket {
 impl WeekBucket {
     /// Heatmap intensity level in `0..=4`.
     ///
-    /// - `0` — no activity
-    /// - `1`–`4` — ⌈count × 4 / max_count⌉, matching GitHub's four shades
+    /// Uses absolute thresholds on total contributions (merged CLs + reviews,
+    /// weighted equally) so that individual busy weeks don't wash out the rest
+    /// of the grid:
     ///
-    /// Returns `0` when `max_count == 0` (all buckets are empty).
-    pub fn level(&self, max_count: u32) -> u8 {
-        if self.count == 0 || max_count == 0 {
-            return 0;
+    /// ```text
+    /// L0  count = 0
+    /// L1  count ≥  1
+    /// L2  count ≥  3
+    /// L3  count ≥  6
+    /// L4  count ≥ 10
+    /// ```
+    pub fn level(&self) -> u8 {
+        match self.count {
+            0 => 0,
+            1..=2 => 1,
+            3..=5 => 2,
+            6..=9 => 3,
+            _ => 4,
         }
-        // Ceiling integer division: ⌈count * 4 / max⌉, clamped to 4.
-        ((self.count * 4 + max_count - 1) / max_count).min(4) as u8
     }
 
     /// The project family with the most CLs this week.
@@ -152,6 +165,7 @@ pub fn compute(changes: &[ChangeInfo], reviews: &[ReviewEvent], now: DateTime<Ut
         .map(|i| WeekBucket {
             week_start: heatmap_start + Duration::weeks(i as i64),
             count: 0,
+            review_count: 0,
             lines_changed: 0,
             family_counts: HashMap::new(),
         })
@@ -230,6 +244,7 @@ pub fn compute(changes: &[ChangeInfo], reviews: &[ReviewEvent], now: DateTime<Ut
             let idx = (ws - heatmap_start).num_weeks() as usize;
             if idx < HEATMAP_WEEKS {
                 buckets[idx].count += 1;
+                buckets[idx].review_count += 1;
                 *buckets[idx]
                     .family_counts
                     .entry(project_family(&event.project).to_owned())
@@ -527,53 +542,43 @@ mod tests {
     // Intensity levels
     // -----------------------------------------------------------------------
 
+    fn bucket(count: u32, review_count: u32) -> WeekBucket {
+        WeekBucket {
+            week_start: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
+            count,
+            review_count,
+            lines_changed: 0,
+            family_counts: HashMap::new(),
+        }
+    }
+
     #[test]
     fn level_zero_for_empty_bucket() {
-        let b = WeekBucket {
-            week_start: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
-            count: 0,
-            lines_changed: 0,
-            family_counts: HashMap::new(),
-        };
-        assert_eq!(b.level(10), 0);
-        assert_eq!(b.level(0), 0);
+        assert_eq!(bucket(0, 0).level(), 0);
     }
 
     #[test]
-    fn level_four_for_max_count() {
-        let b = WeekBucket {
-            week_start: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
-            count: 10,
-            lines_changed: 0,
-            family_counts: HashMap::new(),
-        };
-        assert_eq!(b.level(10), 4);
-    }
-
-    #[test]
-    fn level_one_for_smallest_nonzero() {
-        let b = WeekBucket {
-            week_start: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
-            count: 1,
-            lines_changed: 0,
-            family_counts: HashMap::new(),
-        };
-        // With max=100, a count of 1 should be the dimmest non-zero shade.
-        assert_eq!(b.level(100), 1);
+    fn level_thresholds() {
+        assert_eq!(bucket(1, 0).level(), 1); // L1
+        assert_eq!(bucket(2, 0).level(), 1); // L1
+        assert_eq!(bucket(3, 0).level(), 2); // L2
+        assert_eq!(bucket(5, 0).level(), 2); // L2
+        assert_eq!(bucket(6, 0).level(), 3); // L3
+        assert_eq!(bucket(9, 0).level(), 3); // L3
+        assert_eq!(bucket(10, 0).level(), 4); // L4
+        assert_eq!(bucket(20, 0).level(), 4); // L4
+        // reviews count the same as CLs
+        assert_eq!(bucket(3, 3).level(), 2); // 3 reviews → L2
+        assert_eq!(bucket(6, 6).level(), 3); // 6 reviews → L3
+        assert_eq!(bucket(10, 10).level(), 4); // 10 reviews → L4
     }
 
     #[test]
     fn levels_are_monotonically_non_decreasing_with_count() {
-        let max = 20u32;
+        // All CLs, no reviews — level must not decrease as count rises.
         let mut prev = 0u8;
-        for c in 1..=max {
-            let b = WeekBucket {
-                week_start: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
-                count: c,
-                lines_changed: 0,
-                family_counts: HashMap::new(),
-            };
-            let lv = b.level(max);
+        for c in 1..=20u32 {
+            let lv = bucket(c, 0).level();
             assert!(lv >= prev, "level dropped: count={c} lv={lv} prev={prev}");
             assert!(lv >= 1 && lv <= 4);
             prev = lv;
