@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="740" height="140" viewBox="0 0 740 140" role="img" aria-label="gerritoscopy heatmap for test@example.com">
+<title>gerritoscopy · test@example.com</title>
+<style>
+:root {
+  --bg:#ffffff;
+  --border:#d0d7de;
+  --title:#24292f;
+  --text:#57606a;
+  --muted:#6e7781;
+  --l0:#ebedf0;
+  --l1:#9be9a8;
+  --l2:#40c463;
+  --l3:#30a14e;
+  --l4:#216e39;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#0d1117;
+    --border:#30363d;
+    --title:#c9d1d9;
+    --text:#8b949e;
+    --muted:#6e7781;
+    --l0:#161b22;
+    --l1:#0e4429;
+    --l2:#006d32;
+    --l3:#26a641;
+    --l4:#39d353;
+  }
+}
+rect.week { stroke: none; }
+.l0{fill:var(--l0)} .l1{fill:var(--l1)} .l2{fill:var(--l2)}
+.l3{fill:var(--l3)} .l4{fill:var(--l4)}
+
+</style>
+<rect width="740" height="140" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+<text x="16" y="30" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="bold" fill="var(--title)">gerritoscopy · test@example.com</text>
+<text x="16" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Feb</text>
+<text x="94" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Apr</text>
+<text x="146" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">May</text>
+<text x="198" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Jun</text>
+<text x="263" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Jul</text>
+<text x="315" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Aug</text>
+<text x="367" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Sep</text>
+<text x="432" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Oct</text>
+<text x="484" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Nov</text>
+<text x="536" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Dec</text>
+<text x="601" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Jan</text>
+<text x="653" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--muted)">Feb</text>
+<g class="heatmap">
+  <rect x="16" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-02-24</title></rect>
+  <rect x="29" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-03-03</title></rect>
+  <rect x="42" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-03-10</title></rect>
+  <rect x="55" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-03-17</title></rect>
+  <rect x="68" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-03-24</title></rect>
+  <rect x="81" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-03-31</title></rect>
+  <rect x="94" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-04-07</title></rect>
+  <rect x="107" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-04-14</title></rect>
+  <rect x="120" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-04-21</title></rect>
+  <rect x="133" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-04-28</title></rect>
+  <rect x="146" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-05-05</title></rect>
+  <rect x="159" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-05-12</title></rect>
+  <rect x="172" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-05-19</title></rect>
+  <rect x="185" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-05-26</title></rect>
+  <rect x="198" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-06-02</title></rect>
+  <rect x="211" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-06-09</title></rect>
+  <rect x="224" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-06-16</title></rect>
+  <rect x="237" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-06-23</title></rect>
+  <rect x="250" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-06-30</title></rect>
+  <rect x="263" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-07-07</title></rect>
+  <rect x="276" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-07-14</title></rect>
+  <rect x="289" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-07-21</title></rect>
+  <rect x="302" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-07-28</title></rect>
+  <rect x="315" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-08-04</title></rect>
+  <rect x="328" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-08-11</title></rect>
+  <rect x="341" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-08-18</title></rect>
+  <rect x="354" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-08-25</title></rect>
+  <rect x="367" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-09-01</title></rect>
+  <rect x="380" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-09-08</title></rect>
+  <rect x="393" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-09-15</title></rect>
+  <rect x="406" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-09-22</title></rect>
+  <rect x="419" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-09-29</title></rect>
+  <rect x="432" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-10-06</title></rect>
+  <rect x="445" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-10-13</title></rect>
+  <rect x="458" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-10-20</title></rect>
+  <rect x="471" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-10-27</title></rect>
+  <rect x="484" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-11-03</title></rect>
+  <rect x="497" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-11-10</title></rect>
+  <rect x="510" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-11-17</title></rect>
+  <rect x="523" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-11-24</title></rect>
+  <rect x="536" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-12-01</title></rect>
+  <rect x="549" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-12-08</title></rect>
+  <rect x="562" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-12-15</title></rect>
+  <rect x="575" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-12-22</title></rect>
+  <rect x="588" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2025-12-29</title></rect>
+  <rect x="601" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2026-01-05</title></rect>
+  <rect x="614" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2026-01-12</title></rect>
+  <rect x="627" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2026-01-19</title></rect>
+  <rect x="640" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2026-01-26</title></rect>
+  <rect x="653" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2026-02-02</title></rect>
+  <rect x="666" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2026-02-09</title></rect>
+  <rect x="679" y="52" width="10" height="10" rx="2" class="week l0"><title>No CLs – week of 2026-02-16</title></rect>
+</g>
+<text x="16" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" fill="var(--muted)">peak: 0 CLs/wk</text>
+<line x1="16" y1="90" x2="724" y2="90" stroke="var(--border)" stroke-width="1"/>
+<text x="16" y="106" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="var(--text)">0 merged · 0/90d · +0/−0 · 0wk streak</text>
+</svg>
