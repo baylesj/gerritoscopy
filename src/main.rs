@@ -89,7 +89,7 @@ fn print_report(owner: &str, s: &Stats) {
 
     println!();
     println!("┌{bar}┐");
-    println!("│  gerritoscopy · {owner:<width$}│", width = width - 18);
+    println!("│  gerritoscopy · {owner:<width$}│", width = width - 17);
     println!("└{bar}┘");
 
     print_heatmap(&s.heatmap);
