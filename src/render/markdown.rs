@@ -41,7 +41,7 @@ const TEMPLATE: &str = r#"## gerritoscopy · {{ owner }}
 
 ---
 
-_Updated {{ generated_at }} · [{{ host_display }}]({{ query_url }})_
+_Updated {{ generated_at }} · {{ host_links }}_
 "#;
 
 // ---------------------------------------------------------------------------
@@ -60,16 +60,17 @@ struct ProjectRow {
 // Public API
 // ---------------------------------------------------------------------------
 
-/// Render the markdown report for `owner` on `host` given pre-computed `stats`.
+/// Render the markdown report for `owner` across one or more Gerrit hosts.
+///
+/// `hosts` is a slice of `(alias, base_url)` pairs — the same list returned
+/// by [`crate::hosts::expand`].  For a single host the footer shows the full
+/// hostname; for multiple hosts it lists each alias with its own query link.
 ///
 /// Returns the full markdown string.  Write it to a file with
 /// `std::fs::write(path, render(...)?)?`.
-pub fn render(owner: &str, host: &str, stats: &Stats) -> Result<String> {
+pub fn render(owner: &str, hosts: &[(String, String)], stats: &Stats) -> Result<String> {
     let mut env = Environment::new();
-    // trim_blocks: remove the newline after {% ... %} tags so loop rows
-    // don't accumulate blank lines.
     env.set_trim_blocks(true);
-    // lstrip_blocks: strip leading spaces/tabs before {% ... %} tags.
     env.set_lstrip_blocks(true);
 
     let projects: Vec<ProjectRow> = stats
@@ -84,15 +85,26 @@ pub fn render(owner: &str, host: &str, stats: &Stats) -> Result<String> {
         .collect();
 
     let generated_at = chrono::Utc::now().format("%Y-%m-%d").to_string();
-    let query_url = format!("{}/q/owner:{}", host, owner);
-    // Strip the protocol for the link text so it reads cleanly.
-    let host_display = host
-        .trim_start_matches("https://")
-        .trim_start_matches("http://");
+
+    // Build footer link(s).
+    // Single host: "[chromium-review.googlesource.com](url/q/owner:...)"
+    // Multi-host:  "[chromium](url) · [go](url)"
+    let host_links = if hosts.len() == 1 {
+        let (_, url) = &hosts[0];
+        let display = url
+            .trim_start_matches("https://")
+            .trim_start_matches("http://");
+        format!("[{display}]({}/q/owner:{owner})", url)
+    } else {
+        hosts
+            .iter()
+            .map(|(alias, url)| format!("[{alias}]({url}/q/owner:{owner})"))
+            .collect::<Vec<_>>()
+            .join(" · ")
+    };
 
     let ctx = minijinja::context! {
         owner          => owner,
-        host_display   => host_display,
         heatmap_block  => heatmap_code_block(&stats.heatmap),
         total_merged   => fmt_count(stats.total_merged as i64),
         total_ins      => fmt_count(stats.total_insertions),
@@ -102,7 +114,7 @@ pub fn render(owner: &str, host: &str, stats: &Stats) -> Result<String> {
         longest_streak => stats.heatmap.longest_streak(),
         top_projects   => projects,
         generated_at   => generated_at,
-        query_url      => query_url,
+        host_links     => host_links,
     };
 
     Ok(env.render_str(TEMPLATE, ctx)?)
@@ -152,24 +164,32 @@ mod tests {
         crate::stats::compute(&changes, ts("2024-06-12"))
     }
 
+    fn single_host(url: &str) -> Vec<(String, String)> {
+        let alias = url
+            .trim_start_matches("https://")
+            .trim_start_matches("http://")
+            .to_owned();
+        vec![(alias, url.to_owned())]
+    }
+
     #[test]
     fn render_produces_non_empty_string() {
         let stats = sample_stats();
-        let md = render("alice@example.com", "https://example-review.example.com", &stats).unwrap();
+        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
         assert!(!md.is_empty());
     }
 
     #[test]
     fn render_contains_owner() {
         let stats = sample_stats();
-        let md = render("alice@example.com", "https://example-review.example.com", &stats).unwrap();
+        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
         assert!(md.contains("alice@example.com"), "owner missing from output");
     }
 
     #[test]
     fn render_contains_heatmap_fence() {
         let stats = sample_stats();
-        let md = render("alice@example.com", "https://example-review.example.com", &stats).unwrap();
+        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
         assert!(md.contains("```\n"), "opening code fence missing");
         // Count fence occurrences — should have opening and closing.
         assert_eq!(md.matches("```").count(), 2, "expected exactly one fenced block");
@@ -178,7 +198,7 @@ mod tests {
     #[test]
     fn render_contains_top_project_names() {
         let stats = sample_stats();
-        let md = render("alice@example.com", "https://example-review.example.com", &stats).unwrap();
+        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
         assert!(md.contains("chromium/src"),    "chromium/src missing");
         assert!(md.contains("openscreen"),       "openscreen missing");
         assert!(md.contains("openscreen/quic"),  "openscreen/quic missing");
@@ -187,7 +207,7 @@ mod tests {
     #[test]
     fn render_contains_stats_table_headers() {
         let stats = sample_stats();
-        let md = render("alice@example.com", "https://example-review.example.com", &stats).unwrap();
+        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
         assert!(md.contains("Merged (all time)"));
         assert!(md.contains("Last 90 days"));
         assert!(md.contains("Lines added"));
@@ -197,7 +217,7 @@ mod tests {
     #[test]
     fn render_host_display_strips_protocol() {
         let stats = sample_stats();
-        let md = render("alice@example.com", "https://example-review.example.com", &stats).unwrap();
+        let md = render("alice@example.com", &single_host("https://example-review.example.com"), &stats).unwrap();
         // The link text should not include "https://".
         assert!(md.contains("[example-review.example.com]"), "protocol not stripped from link text");
         assert!(!md.contains("[https://"), "protocol leaked into link text");
@@ -207,7 +227,20 @@ mod tests {
     fn render_formatted_numbers_use_commas() {
         let changes = vec![merged_cl("repo", "2024-06-10", 12345, 678)];
         let stats = crate::stats::compute(&changes, ts("2024-06-12"));
-        let md = render("u@example.com", "https://example.com", &stats).unwrap();
+        let md = render("u@example.com", &single_host("https://example.com"), &stats).unwrap();
         assert!(md.contains("12,345"), "insertions not comma-formatted");
+    }
+
+    #[test]
+    fn render_multi_host_footer_uses_aliases() {
+        let stats = sample_stats();
+        let hosts = vec![
+            ("chromium".to_owned(), "https://chromium-review.googlesource.com".to_owned()),
+            ("go".to_owned(),       "https://go-review.googlesource.com".to_owned()),
+        ];
+        let md = render("alice@example.com", &hosts, &stats).unwrap();
+        assert!(md.contains("[chromium]"), "chromium alias missing from multi-host footer");
+        assert!(md.contains("[go]"),       "go alias missing from multi-host footer");
+        assert!(!md.contains("[https://"), "protocol leaked into multi-host link text");
     }
 }

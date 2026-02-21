@@ -1,4 +1,5 @@
 mod gerrit;
+mod hosts;
 mod render;
 mod stats;
 
@@ -7,8 +8,9 @@ use std::path::PathBuf;
 use anyhow::{Context, Result};
 use chrono::NaiveDate;
 use clap::Parser;
+use tokio::task::JoinSet;
 
-use gerrit::{ChangeQuery, ChangeStatus, GerritClient};
+use gerrit::{ChangeInfo, ChangeQuery, ChangeStatus, GerritClient};
 use render::{fmt_count, heatmap_body, heatmap_header};
 use stats::{Heatmap, Stats};
 
@@ -22,9 +24,11 @@ use stats::{Heatmap, Stats};
     about = "Fetch Gerrit contribution stats and render a profile heatmap"
 )]
 struct Args {
-    /// Gerrit base URL.
-    #[arg(long, default_value = "https://chromium-review.googlesource.com")]
-    host: String,
+    /// Gerrit host(s) to query.  Accepts short aliases (chromium, go, android,
+    /// fuchsia, skia, gerrit, wikimedia, qt, libreoffice, onap), full URLs, or
+    /// comma-separated lists.  May be repeated.  Defaults to "chromium".
+    #[arg(long, default_value = "chromium")]
+    hosts: Vec<String>,
 
     /// Account to query — email address, username, or `self`.
     #[arg(long)]
@@ -55,18 +59,31 @@ struct Args {
 async fn main() -> Result<()> {
     let args = Args::parse();
 
-    let client = build_client(&args)?;
+    let resolved = hosts::expand(&args.hosts)?;
     let query = build_query(&args)?;
+    let prefix_projects = resolved.len() > 1;
 
-    eprintln!("fetching changes for {} from {} …", args.owner, args.host);
-    let changes = client.fetch_changes(&query).await?;
-    eprintln!("  {} CLs fetched", changes.len());
+    let host_list: String = resolved
+        .iter()
+        .map(|(a, _)| a.as_str())
+        .collect::<Vec<_>>()
+        .join(", ");
+    eprintln!("fetching changes for {} from [{}] …", args.owner, host_list);
+
+    let mut changes = fetch_all(&resolved, &query, &args, prefix_projects).await?;
+    eprintln!("  {} CLs fetched total", changes.len());
+
+    // When combining multiple hosts, sort by submitted date so the heatmap
+    // and stats reflect chronological order correctly.
+    if prefix_projects {
+        changes.sort_by_key(|c| c.submitted.unwrap_or(c.updated));
+    }
 
     let stats = stats::compute(&changes, chrono::Utc::now());
-    print_report(&args.owner, &stats);
+    print_report(&args.owner, &resolved, &stats);
 
     if let Some(ref path) = args.output_md {
-        let md = render::markdown::render(&args.owner, &args.host, &stats)?;
+        let md = render::markdown::render(&args.owner, &resolved, &stats)?;
         std::fs::write(path, &md)
             .with_context(|| format!("writing {}", path.display()))?;
         eprintln!("wrote {}", path.display());
@@ -75,12 +92,53 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn build_client(args: &Args) -> Result<GerritClient> {
-    let c = GerritClient::new(&args.host)?;
-    Ok(match (&args.username, &args.password) {
-        (Some(u), Some(p)) => c.with_auth(u, p),
-        _ => c,
-    })
+// ---------------------------------------------------------------------------
+// Fetching
+// ---------------------------------------------------------------------------
+
+/// Fetch changes from all hosts concurrently.
+///
+/// When `prefix_projects` is true (i.e. more than one host), each
+/// `ChangeInfo.project` is prefixed with `"alias::"` so that
+/// `stats::project_family` can group heatmap colours by host.
+async fn fetch_all(
+    resolved: &[(String, String)],
+    query: &ChangeQuery,
+    args: &Args,
+    prefix_projects: bool,
+) -> Result<Vec<ChangeInfo>> {
+    let mut set: JoinSet<Result<(String, Vec<ChangeInfo>)>> = JoinSet::new();
+
+    for (alias, url) in resolved {
+        let alias = alias.clone();
+        let url = url.clone();
+        let query = query.clone();
+        let username = args.username.clone();
+        let password = args.password.clone();
+
+        set.spawn(async move {
+            let client = GerritClient::new(&url)?;
+            let client = match (&username, &password) {
+                (Some(u), Some(p)) => client.with_auth(u, p),
+                _ => client,
+            };
+            let changes = client.fetch_changes(&query).await?;
+            Ok((alias, changes))
+        });
+    }
+
+    let mut all = Vec::new();
+    while let Some(result) = set.join_next().await {
+        let (alias, mut changes) = result.context("task panicked")??;
+        eprintln!("  {} CLs from {alias}", changes.len());
+        if prefix_projects {
+            for c in &mut changes {
+                c.project = format!("{alias}::{}", c.project);
+            }
+        }
+        all.extend(changes);
+    }
+    Ok(all)
 }
 
 fn build_query(args: &Args) -> Result<ChangeQuery> {
@@ -97,13 +155,20 @@ fn build_query(args: &Args) -> Result<ChangeQuery> {
 // Terminal report
 // ---------------------------------------------------------------------------
 
-fn print_report(owner: &str, s: &Stats) {
+fn print_report(owner: &str, hosts: &[(String, String)], s: &Stats) {
     let width = 60;
     let bar = "─".repeat(width);
+
+    let host_label: String = hosts
+        .iter()
+        .map(|(a, _)| a.as_str())
+        .collect::<Vec<_>>()
+        .join(", ");
 
     println!();
     println!("┌{bar}┐");
     println!("│  gerritoscopy · {owner:<width$}│", width = width - 17);
+    println!("│  hosts: {host_label:<width$}│", width = width - 9);
     println!("└{bar}┘");
 
     print_heatmap(&s.heatmap);

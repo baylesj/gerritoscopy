@@ -241,7 +241,7 @@ pub fn compute(changes: &[ChangeInfo], now: DateTime<Utc>) -> Stats {
 /// Map a full Gerrit project path to the family name used for heatmap
 /// colouring and per-project segments.
 ///
-/// The family is the **first path segment** of the project name, which rolls
+/// **Single-host** — family is the first `/`-separated path segment, rolling
 /// sub-repositories up into their parent:
 ///
 /// | Project                       | Family      |
@@ -250,11 +250,27 @@ pub fn compute(changes: &[ChangeInfo], now: DateTime<Utc>) -> Stats {
 /// | `openscreen/quic`             | `openscreen`|
 /// | `chromium/src`                | `chromium`  |
 /// | `chromium/third_party/ffmpeg` | `chromium`  |
-/// | `chromium/tools/build`        | `chromium`  |
 ///
-/// Per-project *stats* (`top_projects`) still use the full project name;
-/// this function is only used for the heatmap visualisation.
+/// **Multi-host** — when querying multiple Gerrit instances `main.rs`
+/// prefixes each project with the host alias using `::` as separator
+/// (`"chromium::chromium/src"`).  In that case the prefix becomes the family,
+/// which conveniently groups all activity on that host under one colour:
+///
+/// | Project                      | Family     |
+/// |------------------------------|------------|
+/// | `chromium::chromium/src`     | `chromium` |
+/// | `chromium::openscreen`       | `chromium` |
+/// | `go::cmd/go`                 | `go`       |
+///
+/// Per-project *stats* (`top_projects`) always use the full project name
+/// (including any `alias::` prefix); only the heatmap visualisation uses
+/// families.
 pub fn project_family(project: &str) -> &str {
+    // Multi-host prefix takes precedence: "alias::rest" → "alias"
+    if let Some((prefix, _)) = project.split_once("::") {
+        return prefix;
+    }
+    // Single-host: first path segment rolls up sub-repos.
     project.split('/').next().unwrap_or(project)
 }
 
@@ -624,6 +640,22 @@ mod tests {
         assert_eq!(project_family("chromium/src"), "chromium");
         assert_eq!(project_family("chromium/third_party/ffmpeg"), "chromium");
         assert_eq!(project_family("chromium/tools/build"), "chromium");
+    }
+
+    #[test]
+    fn project_family_multi_host_prefix() {
+        // When multiple hosts are queried, main.rs prefixes with "alias::".
+        assert_eq!(project_family("chromium::chromium/src"), "chromium");
+        assert_eq!(project_family("chromium::openscreen/quic"), "chromium");
+        assert_eq!(project_family("go::cmd/go"), "go");
+        assert_eq!(project_family("android::platform/frameworks/base"), "android");
+    }
+
+    #[test]
+    fn project_family_multi_host_prefix_beats_path_split() {
+        // The :: prefix must take precedence over the / split.
+        // "go::x/tools" family is "go" (the host), not "go::x" or "x".
+        assert_eq!(project_family("go::x/tools"), "go");
     }
 
     // -----------------------------------------------------------------------
