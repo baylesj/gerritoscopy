@@ -337,24 +337,16 @@ fn css_block(theme: &Theme, families: &[String], multi_color: bool) -> String {
         for (fi, _family) in families.iter().enumerate() {
             let palette_idx = fi % FAMILY_PALETTES.len();
             let (light_lvls, dark_lvls) = &FAMILY_PALETTES[palette_idx];
-            // Light (default)
+            // Light (default) — variables must live inside :root {}.
+            css.push_str(":root {\n");
             for (li, color) in light_lvls.iter().enumerate() {
-                css.push_str(&format!(
-                    "  --f{fi}-l{}:{};\n",
-                    li + 1,
-                    color
-                ));
+                css.push_str(&format!("  --f{fi}-l{}:{};\n", li + 1, color));
             }
-            // Dark override
-            css.push_str(&format!(
-                "@media (prefers-color-scheme: dark) {{\n  :root {{\n"
-            ));
+            css.push_str("}\n");
+            // Dark override.
+            css.push_str("@media (prefers-color-scheme: dark) {\n  :root {\n");
             for (li, color) in dark_lvls.iter().enumerate() {
-                css.push_str(&format!(
-                    "    --f{fi}-l{}:{};\n",
-                    li + 1,
-                    color
-                ));
+                css.push_str(&format!("    --f{fi}-l{}:{};\n", li + 1, color));
             }
             css.push_str("  }\n}\n");
         }
