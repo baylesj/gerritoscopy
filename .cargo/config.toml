@@ -1,0 +1,5 @@
+# ring 0.17.x doesn't pass -isysroot to cc on macOS 26, so the compiler
+# can't find SDK headers like TargetConditionals.h unless SDKROOT is set
+# explicitly.  Remove or update this when ring ships a fix.
+[env]
+SDKROOT = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk"
