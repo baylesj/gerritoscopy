@@ -101,6 +101,16 @@ async fn main() -> Result<()> {
         eprintln!("wrote {}", path.display());
     }
 
+    if let Some(ref path) = args.output_svg {
+        let opts = render::svg::SvgOptions {
+            theme: &args.svg_theme,
+            multi_color: args.svg_multi_color,
+        };
+        let svg = render::svg::render(&args.owner, &resolved, &stats, &opts)?;
+        std::fs::write(path, &svg).with_context(|| format!("writing {}", path.display()))?;
+        eprintln!("wrote {}", path.display());
+    }
+
     Ok(())
 }
 
