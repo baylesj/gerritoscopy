@@ -6,6 +6,14 @@ A Rust CLI — and reusable GitHub Action — that fetches contribution data fro
 more Gerrit instances and renders a GitHub-profile heatmap card as an SVG, plus an
 optional markdown report.
 
+While GitHub can count your contributions from Gerrit managed projects, if they have
+a mirror on GitHub, it doesn't currently do a good job of handling reviews and other
+types of activity that continue to become more and more important.
+
+As tooling makes developing features easier, the important of reviews will only
+continue to increase. This tool is intended to make that activity more visible and
+help showcase developer's impact and contributions.
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  gerritoscope · you@example.com                            │
