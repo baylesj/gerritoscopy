@@ -1,8 +1,3 @@
-mod gerrit;
-mod hosts;
-mod render;
-mod stats;
-
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
@@ -10,9 +5,12 @@ use chrono::NaiveDate;
 use clap::Parser;
 use tokio::task::JoinSet;
 
-use gerrit::{ChangeInfo, ChangeQuery, ChangeStatus, GerritClient, ReviewEvent, ReviewerQuery};
-use render::{fmt_count, heatmap_body, heatmap_header};
-use stats::{Heatmap, Stats};
+use gerritoscope::gerrit::{
+    ChangeInfo, ChangeQuery, ChangeStatus, GerritClient, ReviewEvent, ReviewerQuery,
+};
+use gerritoscope::render::{fmt_count, heatmap_body, heatmap_header};
+use gerritoscope::stats::{Heatmap, Stats};
+use gerritoscope::{hosts, render, stats};
 
 // ---------------------------------------------------------------------------
 // CLI

@@ -110,18 +110,18 @@ After the workflow runs, embed the SVG in your profile README:
 
 ## Themes
 
-| Theme | Description |
-|-------|-------------|
-| `github` | GitHub default (auto light/dark) |
-| `github-light` | GitHub light mode |
-| `github-dark` | GitHub dark mode |
-| `solarized-light` | Solarized light |
-| `solarized-dark` | Solarized dark |
-| `gruvbox-dark` | Gruvbox dark |
-| `gruvbox-light` | Gruvbox light |
-| `tokyo-night` | Tokyo Night |
-| `dracula` | Dracula |
-| `catppuccin-mocha` | Catppuccin Mocha |
+| Theme | Description | Preview |
+|-------|-------------|---------|
+| `github` | GitHub default (auto light/dark) | <img src="docs/themes/github.svg" width="370" alt="github"> |
+| `github-light` | GitHub light mode | <img src="docs/themes/github-light.svg" width="370" alt="github-light"> |
+| `github-dark` | GitHub dark mode | <img src="docs/themes/github-dark.svg" width="370" alt="github-dark"> |
+| `solarized-light` | Solarized light | <img src="docs/themes/solarized-light.svg" width="370" alt="solarized-light"> |
+| `solarized-dark` | Solarized dark | <img src="docs/themes/solarized-dark.svg" width="370" alt="solarized-dark"> |
+| `gruvbox-dark` | Gruvbox dark | <img src="docs/themes/gruvbox-dark.svg" width="370" alt="gruvbox-dark"> |
+| `gruvbox-light` | Gruvbox light | <img src="docs/themes/gruvbox-light.svg" width="370" alt="gruvbox-light"> |
+| `tokyo-night` | Tokyo Night | <img src="docs/themes/tokyo-night.svg" width="370" alt="tokyo-night"> |
+| `dracula` | Dracula | <img src="docs/themes/dracula.svg" width="370" alt="dracula"> |
+| `catppuccin-mocha` | Catppuccin Mocha | <img src="docs/themes/catppuccin-mocha.svg" width="370" alt="catppuccin-mocha"> |
 
 ## Supported Gerrit hosts
 
